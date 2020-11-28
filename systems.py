@@ -1,24 +1,32 @@
-import jsonlines
-import random
+import pysolr
 
 class Ranker(object):
 
     def __init__(self):
         self.idx = None
+        self.solr = pysolr.Solr('http://134.95.56.177:8080/solr/default/')
 
     def index(self):
         pass
 
     def rank_publications(self, query, page, rpp):
+        
+        # Actually only working from ZBMED intranet due to firewall restrictions
 
+        hits = 0
         itemlist = []
+
+        if(query):
+            res = self.solr.search(f'FS:{query}',**{'fl':'DBRECORDID','start':page*rpp,'rows':rpp})
+            itemlist = [r['DBRECORDID'] for r in res]
+            hits = res.hits
 
         return {
             'page': page,
             'rpp': rpp,
             'query': query,
             'itemlist': itemlist,
-            'num_found': len(itemlist)
+            'num_found': hits
         }
 
 
@@ -28,14 +36,11 @@ class Recommender(object):
         self.idx = None
 
     def index(self):
-        self.idx = []
-        with jsonlines.open('./data/gesis-search/datasets/dataset.jsonl') as reader:
-            for obj in reader:
-                self.idx.append(obj['id'])
+        pass
 
     def recommend_datasets(self, item_id, page, rpp):
 
-        itemlist = random.choices(self.idx, k=rpp)
+        itemlist = []
 
         return {
             'page': page,
@@ -47,7 +52,7 @@ class Recommender(object):
 
     def recommend_publications(self, item_id, page, rpp):
 
-        itemlist = random.choices(self.idx, k=rpp)
+        itemlist = []
 
         return {
             'page': page,
