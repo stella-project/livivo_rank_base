@@ -1,32 +1,32 @@
-import pysolr
+import requests
 
 class Ranker(object):
 
     def __init__(self):
         self.idx = None
-        self.solr = pysolr.Solr('http://134.95.56.177:8080/solr/default/')
+        self.connector_url = 'http://astral.zbmed.de:8000'
 
     def index(self):
         pass
 
-    def rank_publications(self, query, page, rpp):
+    def rank_publications(self, query, page=0, rpp=10):
         
-        # Actually only working from ZBMED intranet due to firewall restrictions
-
-        hits = 0
+        num_found = 0
         itemlist = []
 
-        if(query):
-            res = self.solr.search(f'FS:{query}',**{'fl':'DBRECORDID','start':page*rpp,'rows':rpp})
-            itemlist = [r['DBRECORDID'] for r in res]
-            hits = res.hits
 
+        if(query):
+            response = requests.get(f'{self.connector_url}/ranking?query={query}&page={page}&rpp={rpp}')
+            if (response.status__code == 200):
+                result = response.json()
+                itemlist = result['itemlist']
+                num_found = result['num_found']
         return {
             'page': page,
             'rpp': rpp,
             'query': query,
             'itemlist': itemlist,
-            'num_found': hits
+            'num_found': num_found
         }
 
 

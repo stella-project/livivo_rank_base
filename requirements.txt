@@ -1,2 +1,2 @@
 flask
-pysolr
+requests
