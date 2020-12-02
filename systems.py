@@ -17,7 +17,7 @@ class Ranker(object):
 
         if(query):
             response = requests.get(f'{self.connector_url}/ranking?query={query}&page={page}&rpp={rpp}')
-            if (response.status__code == 200):
+            if (response.status_code == 200):
                 result = response.json()
                 itemlist = result['itemlist']
                 num_found = result['num_found']
